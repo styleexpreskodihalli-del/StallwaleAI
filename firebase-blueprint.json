@@ -1,0 +1,768 @@
+{
+  "entities": {
+    "Store": {
+      "title": "Store",
+      "description": "An independent local business or store owned by a user.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the store owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Store or business name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "description": "Business category.",
+          "enum": [
+            "Restaurant",
+            "Salon",
+            "Beauty & Spa",
+            "Retail Store",
+            "Clothing Store",
+            "Grocery Store",
+            "Cafe",
+            "Hotel",
+            "Preschool",
+            "School",
+            "Professional Service",
+            "Other"
+          ]
+        },
+        "businessType": {
+          "type": "string",
+          "description": "Specific business type or specialization.",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Store profile description.",
+          "minLength": 0,
+          "maxLength": 1500
+        },
+        "address": {
+          "type": "string",
+          "description": "Street address of the store.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "description": "City where the store is located.",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "country": {
+          "type": "string",
+          "description": "Country or region where the store is located (e.g., India or Middle East / UAE).",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "phone": {
+          "type": "string",
+          "description": "Store contact phone number.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "website": {
+          "type": "string",
+          "description": "Store website URL.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "openingHours": {
+          "type": "string",
+          "description": "Formatted opening hours schedule.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "services": {
+          "type": "string",
+          "description": "Comma-separated or newline-separated services list.",
+          "minLength": 0,
+          "maxLength": 1000
+        },
+        "seoKeywords": {
+          "type": "array",
+          "description": "Up to 5 target local SEO keywords for this store used to guide AI-generated posts and review responses."
+        },
+        "socialLinks": {
+          "type": "string",
+          "description": "Instagram, Facebook, or WhatsApp profile links.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "tone": {
+          "type": "string",
+          "description": "Brand voice tone for AI content and review responses.",
+          "enum": ["Warm & Friendly", "Professional & Polished", "Energetic & Promotional", "Luxury & Refined"]
+        },
+        "brandVoicePreset": {
+          "type": "string",
+          "description": "Selected predefined Brand Voice template preset name for sentiment-based review replies.",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "brandVoicePositiveTemplate": {
+          "type": "string",
+          "description": "Brand Voice reply template / instructions for Positive sentiment reviews.",
+          "minLength": 0,
+          "maxLength": 600
+        },
+        "brandVoiceNeutralTemplate": {
+          "type": "string",
+          "description": "Brand Voice reply template / instructions for Neutral sentiment reviews.",
+          "minLength": 0,
+          "maxLength": 600
+        },
+        "brandVoiceNegativeTemplate": {
+          "type": "string",
+          "description": "Brand Voice reply template / instructions for Negative sentiment reviews.",
+          "minLength": 0,
+          "maxLength": 600
+        },
+        "brandVoiceSignOff": {
+          "type": "string",
+          "description": "Brand Voice signature sign-off appended to AI review responses.",
+          "minLength": 0,
+          "maxLength": 160
+        },
+        "gbpConnected": {
+          "type": "boolean",
+          "description": "Whether Google Business Profile is connected."
+        },
+        "googleAccountId": {
+          "type": "string",
+          "description": "Connected Google Account ID / UID.",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "gbpAccountEmail": {
+          "type": "string",
+          "description": "Connected Google Business Profile account identifier.",
+          "minLength": 0,
+          "maxLength": 160
+        },
+        "gbpAccountId": {
+          "type": "string",
+          "description": "Google Business Profile Account ID (e.g. accounts/1092837465).",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "gbpLocationId": {
+          "type": "string",
+          "description": "Google Business Profile location identifier.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "gbpTokenStatus": {
+          "type": "string",
+          "description": "Non-sensitive OAuth token metadata status (e.g. valid, scopes: business.manage).",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "gbpLastSync": {
+          "type": "string",
+          "description": "ISO timestamp of last Google Business Profile synchronization.",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "gbpSyncError": {
+          "type": "string",
+          "description": "Last synchronization error message if any, or empty string when nominal.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "gbpAverageRating": {
+          "type": "number",
+          "description": "Google Business Profile overall star rating (e.g. 4.7).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "gbpTotalReviewCount": {
+          "type": "number",
+          "description": "Total number of Google Business Profile reviews.",
+          "minimum": 0
+        },
+        "autoDailyPosts": {
+          "type": "boolean",
+          "description": "Automation toggle for daily Google Posts."
+        },
+        "dailyPostScheduleDate": {
+          "type": "string",
+          "description": "Selected date (YYYY-MM-DD) for the next automated daily Google Post.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "dailyPostScheduleTime": {
+          "type": "string",
+          "description": "Selected time (HH:mm) for daily automated Google Posts.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "autoReviewReplies": {
+          "type": "boolean",
+          "description": "Automation toggle for AI review responses."
+        },
+        "autoOfferReminders": {
+          "type": "boolean",
+          "description": "Automation toggle for seasonal and weekly offer reminders."
+        },
+        "autoProfileMonitoring": {
+          "type": "boolean",
+          "description": "Automation toggle for Google Profile accuracy monitoring."
+        },
+        "autoScoreMonitoring": {
+          "type": "boolean",
+          "description": "Automation toggle for weekly Digital Score tracking."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the store was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the store was last updated."
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "category",
+        "businessType",
+        "description",
+        "address",
+        "city",
+        "phone",
+        "website",
+        "openingHours",
+        "services",
+        "socialLinks",
+        "tone",
+        "gbpConnected",
+        "gbpAccountEmail",
+        "gbpLocationId",
+        "gbpLastSync",
+        "autoDailyPosts",
+        "autoReviewReplies",
+        "autoOfferReminders",
+        "autoProfileMonitoring",
+        "autoScoreMonitoring",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "A Google Business Profile post belonging to a specific store.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "storeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "postType": {
+          "type": "string",
+          "enum": ["Update", "Offer", "Event"]
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "cta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "imageConcept": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Publicly accessible or data URL of the promotional image previewed before publishing.",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Draft", "Scheduled", "Published"]
+        },
+        "scheduledDate": {
+          "type": "string",
+          "description": "Scheduled date (YYYY-MM-DD) when the post should be queued or published.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "scheduledTime": {
+          "type": "string",
+          "description": "Scheduled time (HH:mm) when the post should be queued or published.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "gbpLocalPostName": {
+          "type": "string",
+          "description": "Google Business Profile localPost resource name (accounts/{accountId}/locations/{locationId}/localPosts/{localPostId}).",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "gbpPublishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the post was published live to Google Business Profile.",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "gbpSyncNote": {
+          "type": "string",
+          "description": "Status or diagnostic note from the Google Business Profile LocalPosts API.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "storeId",
+        "postType",
+        "headline",
+        "description",
+        "cta",
+        "imageConcept",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "A promotional offer created for a specific store.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "storeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "discount": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "startDate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "endDate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "terms": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "cta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Promotional banner image URL previewed before publishing.",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "imagePrompt": {
+          "type": "string",
+          "description": "Visual description or prompt used for the offer preview image.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Draft", "Active", "Deactivated"]
+        },
+        "gbpLocalPostName": {
+          "type": "string",
+          "description": "Google Business Profile localPost resource name (accounts/{accountId}/locations/{locationId}/localPosts/{localPostId}).",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "gbpPublishedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the offer was published live to Google Business Profile.",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "gbpSyncNote": {
+          "type": "string",
+          "description": "Status or diagnostic note from the Google Business Profile LocalPosts API.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "storeId",
+        "title",
+        "description",
+        "discount",
+        "startDate",
+        "endDate",
+        "terms",
+        "cta",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A customer review synced or logged for a specific store.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "storeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating from 1 to 5."
+        },
+        "reviewText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "reviewDate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "replyText": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "responseStatus": {
+          "type": "string",
+          "enum": ["Needs Response", "Draft Saved", "Replied"]
+        },
+        "sentiment": {
+          "type": "string",
+          "description": "AI-analyzed customer review sentiment.",
+          "enum": ["Positive", "Neutral", "Negative"]
+        },
+        "gbpReviewName": {
+          "type": "string",
+          "description": "Full Google Business Profile review resource name (accounts/{accountId}/locations/{locationId}/reviews/{reviewId}).",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "gbpReplySyncedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the owner reply was confirmed published to live Google Business Profile.",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "gbpSyncNote": {
+          "type": "string",
+          "description": "Status or diagnostic note from the Google Business Profile Review Reply API.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "storeId",
+        "customerName",
+        "rating",
+        "reviewText",
+        "reviewDate",
+        "replyText",
+        "responseStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserSubscription": {
+      "title": "UserSubscription",
+      "description": "Server-verified 7-day + 50 AI credit trial and recurring ₹499 INR / AED 60 subscription state for a STallwale user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the subscribed user.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "subscriptionStatus": {
+          "type": "string",
+          "enum": [
+            "TRIAL",
+            "TRIAL_EXPIRED",
+            "ACTIVE",
+            "PAYMENT_PENDING",
+            "PAYMENT_FAILED",
+            "CANCELLED",
+            "EXPIRED"
+          ]
+        },
+        "plan": {
+          "type": "string",
+          "enum": ["MONTHLY"]
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["INR", "AED"]
+        },
+        "amount": {
+          "type": "number",
+          "description": "Recurring subscription price (499 for INR, 60 for AED)."
+        },
+        "billingCycle": {
+          "type": "string",
+          "enum": ["30_DAYS"]
+        },
+        "trialStartedAt": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "trialEndsAt": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "trialCreditLimit": {
+          "type": "number",
+          "description": "Trial AI credit allowance (50)."
+        },
+        "trialCreditsUsed": {
+          "type": "number",
+          "description": "AI credits consumed during the trial."
+        },
+        "trialCreditsRemaining": {
+          "type": "number",
+          "description": "AI credits remaining in the trial."
+        },
+        "subscriptionId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "customerId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "lastPaymentId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "razorpayCustomerId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "razorpaySubscriptionId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "subscriptionStartDate": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "trialStartDate": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "trialEndDate": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "currentBillingPeriodStart": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "currentBillingPeriodEnd": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "nextRenewalDate": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "paymentStatus": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "userId",
+        "subscriptionStatus",
+        "plan",
+        "currency",
+        "amount",
+        "billingCycle"
+      ]
+    },
+    "UsageEvent": {
+      "title": "UsageEvent",
+      "description": "Server-logged AI credit usage event.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "storeId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "creditsConsumed": {
+          "type": "number"
+        },
+        "timestamp": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        }
+      },
+      "required": ["userId", "action", "creditsConsumed", "timestamp", "status"]
+    }
+  },
+  "firestore": {
+    "/stores/{storeId}": {
+      "schema": { "$ref": "#/entities/Store" },
+      "description": "Stores owned by authenticated users."
+    },
+    "/stores/{storeId}/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Google posts created for a store."
+    },
+    "/stores/{storeId}/offers/{offerId}": {
+      "schema": { "$ref": "#/entities/Offer" },
+      "description": "Promotional offers for a store."
+    },
+    "/stores/{storeId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer Google reviews for a store."
+    },
+    "/subscriptions/{userId}": {
+      "schema": { "$ref": "#/entities/UserSubscription" },
+      "description": "Read-only subscription records managed exclusively by the backend payment provider webhook."
+    },
+    "/usageEvents/{eventId}": {
+      "schema": { "$ref": "#/entities/UsageEvent" },
+      "description": "Read-only AI credit usage events logged by the backend."
+    }
+  }
+}

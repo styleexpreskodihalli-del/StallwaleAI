@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --bg-alt: #111111;
+  --card: #161616;
+  --card-hover: #1c1c1c;
+  --border: #2a2a2a;
+  --gold: #f0b429;
+  --gold-light: #f8cf6b;
+  --gold-dim: #8a6a1f;
+  --white: #ffffff;
+  --gray: #9c9c9c;
+  --gray-light: #d6d6d6;
+  --gray-dim: #6f6f6f;
+  --green: #1f7a3d;
+  --radius: 14px;
+}
+
+@theme {
+  /* Map Slate palette to STall Dark Obsidian & Gray hierarchy */
+  --color-slate-50: #111111;
+  --color-slate-100: #1c1c1c;
+  --color-slate-200: #2a2a2a;
+  --color-slate-300: #3b3b3b;
+  --color-slate-400: #6f6f6f;
+  --color-slate-500: #9c9c9c;
+  --color-slate-600: #bdbdbd;
+  --color-slate-700: #d6d6d6;
+  --color-slate-800: #efefef;
+  --color-slate-900: #ffffff;
+  --color-slate-950: #ffffff;
+
+  /* Map Blue accent palette to STall Gold (--gold: #f0b429, --gold-light: #f8cf6b, --gold-dim: #8a6a1f) */
+  --color-blue-50: rgba(240, 180, 41, 0.1);
+  --color-blue-100: rgba(240, 180, 41, 0.18);
+  --color-blue-200: #3b321d;
+  --color-blue-300: #8a6a1f;
+  --color-blue-400: #f8cf6b;
+  --color-blue-500: #f0b429;
+  --color-blue-600: #f0b429;
+  --color-blue-700: #f8cf6b;
+  --color-blue-800: #f8cf6b;
+  --color-blue-900: #fde68a;
+
+  /* Dark-mode friendly status accents matching stall.stallwale.in/upgrade.html */
+  --color-emerald-50: rgba(31, 122, 61, 0.16);
+  --color-emerald-100: rgba(31, 122, 61, 0.24);
+  --color-emerald-200: rgba(119, 211, 155, 0.28);
+  --color-emerald-600: #77d39b;
+  --color-emerald-700: #77d39b;
+  --color-emerald-800: #9ae6b4;
+
+  --color-amber-50: rgba(240, 180, 41, 0.12);
+  --color-amber-100: rgba(240, 180, 41, 0.2);
+  --color-amber-200: #4b3b19;
+  --color-amber-400: #f8cf6b;
+  --color-amber-500: #f0b429;
+  --color-amber-600: #f0b429;
+  --color-amber-700: #f8cf6b;
+  --color-amber-800: #f8cf6b;
+
+  --color-red-50: rgba(220, 38, 38, 0.14);
+  --color-red-100: rgba(220, 38, 38, 0.22);
+  --color-red-200: rgba(248, 113, 113, 0.3);
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+    color: var(--white);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--white);
+    font-family: 'Inter', Arial, sans-serif;
+    line-height: 1.5;
+    background-image:
+      linear-gradient(rgba(240, 180, 41, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240, 180, 41, 0.04) 1px, transparent 1px);
+    background-size: 52px 52px;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: #111111;
+    color: #ffffff;
+    border-color: var(--border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--gray-dim);
+  }
+}
+
+/* Map .bg-white surfaces to STall card surface (--card: #161616) */
+.bg-white {
+  background: linear-gradient(160deg, #171717, #121212) !important;
+}
+
+header.bg-white {
+  background: rgba(10, 10, 10, 0.96) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Primary Gold CTA Buttons matching .btn-gold on stall.stallwale.in/upgrade.html */
+button.bg-blue-600,
+a.bg-blue-600,
+span.bg-blue-600 {
+  background: linear-gradient(155deg, var(--gold-light), var(--gold)) !important;
+  color: #1a1204 !important;
+  box-shadow: 0 8px 24px -12px rgba(240, 180, 41, 0.55);
+}
+
+button.bg-blue-600:hover,
+a.bg-blue-600:hover {
+  background: linear-gradient(155deg, #ffe082, #f3bd38) !important;
+  color: #1a1204 !important;
+  box-shadow: 0 12px 30px -12px rgba(240, 180, 41, 0.8);
+}
+
+/* Secondary dark action buttons (e.g. bg-slate-900) styled as STall Ghost Gold buttons (.btn-ghost) */
+button.bg-slate-900 {
+  background: rgba(240, 180, 41, 0.08) !important;
+  border: 1px solid var(--gold-dim) !important;
+  color: var(--gold-light) !important;
+}
+
+button.bg-slate-900:hover {
+  background: rgba(240, 180, 41, 0.16) !important;
+  border-color: var(--gold) !important;
+  color: #ffffff !important;
+}

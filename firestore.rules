@@ -1,0 +1,353 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+    function existing() {
+      return resource.data;
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isVerifiedUser() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true ||
+        request.auth.token.firebase.sign_in_provider == 'password' ||
+        request.auth.token.email in ['styleexpreskodihalli@gmail.com', 'jackkurian044@gmail.com']
+      );
+    }
+    function isParentStoreOwner(storeId) {
+      return exists(/databases/$(database)/documents/stores/$(storeId)) &&
+        get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+    }
+
+    // Validation Blueprint: Store
+    function isValidStore(data) {
+      return data.keys().hasAll([
+        'ownerId', 'name', 'category', 'businessType', 'description',
+        'address', 'city', 'phone', 'website', 'openingHours',
+        'services', 'socialLinks', 'tone', 'gbpConnected',
+        'gbpAccountEmail', 'gbpLocationId', 'gbpLastSync',
+        'autoDailyPosts', 'autoReviewReplies', 'autoOfferReminders',
+        'autoProfileMonitoring', 'autoScoreMonitoring',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'name', 'category', 'businessType', 'description',
+        'address', 'city', 'country', 'phone', 'website', 'openingHours',
+        'services', 'seoKeywords', 'socialLinks', 'tone',
+        'brandVoicePreset', 'brandVoicePositiveTemplate',
+        'brandVoiceNeutralTemplate', 'brandVoiceNegativeTemplate', 'brandVoiceSignOff',
+        'gbpConnected',
+        'googleAccountId', 'gbpAccountEmail', 'gbpAccountId', 'gbpLocationId',
+        'gbpTokenStatus', 'gbpLastSync', 'gbpSyncError',
+        'gbpAverageRating', 'gbpTotalReviewCount',
+        'autoDailyPosts', 'dailyPostScheduleDate', 'dailyPostScheduleTime',
+        'autoReviewReplies', 'autoOfferReminders',
+        'autoProfileMonitoring', 'autoScoreMonitoring',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.ownerId) &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+      data.category is string && data.category in [
+        'Restaurant', 'Salon', 'Beauty & Spa', 'Retail Store',
+        'Clothing Store', 'Grocery Store', 'Cafe', 'Hotel',
+        'Preschool', 'School', 'Professional Service', 'Other'
+      ] &&
+      data.businessType is string && data.businessType.size() <= 100 &&
+      data.description is string && data.description.size() <= 1500 &&
+      data.address is string && data.address.size() <= 200 &&
+      data.city is string && data.city.size() <= 100 &&
+      (!('country' in data) || (data.country is string && data.country.size() <= 80)) &&
+      data.phone is string && data.phone.size() <= 40 &&
+      data.website is string && data.website.size() <= 300 &&
+      data.openingHours is string && data.openingHours.size() <= 500 &&
+      data.services is string && data.services.size() <= 1000 &&
+      (!('seoKeywords' in data) || (
+        data.seoKeywords is list &&
+        data.seoKeywords.size() <= 5 &&
+        (data.seoKeywords.size() == 0 || (data.seoKeywords[0] is string && data.seoKeywords[0].size() <= 60))
+      )) &&
+      data.socialLinks is string && data.socialLinks.size() <= 500 &&
+      data.tone is string && data.tone in [
+        'Warm & Friendly', 'Professional & Polished',
+        'Energetic & Promotional', 'Luxury & Refined'
+      ] &&
+      (!('brandVoicePreset' in data) || (data.brandVoicePreset is string && data.brandVoicePreset.size() <= 100)) &&
+      (!('brandVoicePositiveTemplate' in data) || (data.brandVoicePositiveTemplate is string && data.brandVoicePositiveTemplate.size() <= 600)) &&
+      (!('brandVoiceNeutralTemplate' in data) || (data.brandVoiceNeutralTemplate is string && data.brandVoiceNeutralTemplate.size() <= 600)) &&
+      (!('brandVoiceNegativeTemplate' in data) || (data.brandVoiceNegativeTemplate is string && data.brandVoiceNegativeTemplate.size() <= 600)) &&
+      (!('brandVoiceSignOff' in data) || (data.brandVoiceSignOff is string && data.brandVoiceSignOff.size() <= 160)) &&
+      data.gbpConnected is bool &&
+      (!('googleAccountId' in data) || (data.googleAccountId is string && data.googleAccountId.size() <= 128)) &&
+      data.gbpAccountEmail is string && data.gbpAccountEmail.size() <= 160 &&
+      (!('gbpAccountId' in data) || (data.gbpAccountId is string && data.gbpAccountId.size() <= 120)) &&
+      data.gbpLocationId is string && data.gbpLocationId.size() <= 120 &&
+      (!('gbpTokenStatus' in data) || (data.gbpTokenStatus is string && data.gbpTokenStatus.size() <= 120)) &&
+      data.gbpLastSync is string && data.gbpLastSync.size() <= 60 &&
+      (!('gbpSyncError' in data) || (data.gbpSyncError is string && data.gbpSyncError.size() <= 300)) &&
+      (!('gbpAverageRating' in data) || (data.gbpAverageRating is number && data.gbpAverageRating >= 1 && data.gbpAverageRating <= 5)) &&
+      (!('gbpTotalReviewCount' in data) || (data.gbpTotalReviewCount is number && data.gbpTotalReviewCount >= 0)) &&
+      data.autoDailyPosts is bool &&
+      (!('dailyPostScheduleDate' in data) || (data.dailyPostScheduleDate is string && data.dailyPostScheduleDate.size() <= 40)) &&
+      (!('dailyPostScheduleTime' in data) || (data.dailyPostScheduleTime is string && data.dailyPostScheduleTime.size() <= 40)) &&
+      data.autoReviewReplies is bool &&
+      data.autoOfferReminders is bool &&
+      data.autoProfileMonitoring is bool &&
+      data.autoScoreMonitoring is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Post
+    function isValidPost(data, storeId) {
+      return data.keys().hasAll([
+        'ownerId', 'storeId', 'postType', 'headline', 'description',
+        'cta', 'imageConcept', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'storeId', 'postType', 'headline', 'description',
+        'cta', 'imageConcept', 'imageUrl', 'status',
+        'scheduledDate', 'scheduledTime',
+        'gbpLocalPostName', 'gbpPublishedAt', 'gbpSyncNote',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.ownerId) &&
+      data.storeId == storeId &&
+      isValidId(data.storeId) &&
+      data.postType is string && data.postType in ['Update', 'Offer', 'Event'] &&
+      data.headline is string && data.headline.size() >= 1 && data.headline.size() <= 150 &&
+      data.description is string && data.description.size() >= 1 && data.description.size() <= 1500 &&
+      data.cta is string && data.cta.size() >= 1 && data.cta.size() <= 60 &&
+      data.imageConcept is string && data.imageConcept.size() <= 500 &&
+      (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2000)) &&
+      data.status is string && data.status in ['Draft', 'Scheduled', 'Published'] &&
+      (!('scheduledDate' in data) || (data.scheduledDate is string && data.scheduledDate.size() <= 40)) &&
+      (!('scheduledTime' in data) || (data.scheduledTime is string && data.scheduledTime.size() <= 40)) &&
+      (!('gbpLocalPostName' in data) || (data.gbpLocalPostName is string && data.gbpLocalPostName.size() <= 240)) &&
+      (!('gbpPublishedAt' in data) || (data.gbpPublishedAt is string && data.gbpPublishedAt.size() <= 60)) &&
+      (!('gbpSyncNote' in data) || (data.gbpSyncNote is string && data.gbpSyncNote.size() <= 300)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Offer
+    function isValidOffer(data, storeId) {
+      return data.keys().hasAll([
+        'ownerId', 'storeId', 'title', 'description', 'discount',
+        'startDate', 'endDate', 'terms', 'cta', 'status',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'storeId', 'title', 'description', 'discount',
+        'startDate', 'endDate', 'terms', 'cta',
+        'imageUrl', 'imagePrompt', 'status',
+        'gbpLocalPostName', 'gbpPublishedAt', 'gbpSyncNote',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.ownerId) &&
+      data.storeId == storeId &&
+      isValidId(data.storeId) &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 150 &&
+      data.description is string && data.description.size() >= 1 && data.description.size() <= 1200 &&
+      data.discount is string && data.discount.size() >= 1 && data.discount.size() <= 60 &&
+      data.startDate is string && data.startDate.size() >= 1 && data.startDate.size() <= 40 &&
+      data.endDate is string && data.endDate.size() >= 1 && data.endDate.size() <= 40 &&
+      data.terms is string && data.terms.size() <= 500 &&
+      data.cta is string && data.cta.size() >= 1 && data.cta.size() <= 60 &&
+      (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2000)) &&
+      (!('imagePrompt' in data) || (data.imagePrompt is string && data.imagePrompt.size() <= 500)) &&
+      data.status is string && data.status in ['Draft', 'Active', 'Deactivated'] &&
+      (!('gbpLocalPostName' in data) || (data.gbpLocalPostName is string && data.gbpLocalPostName.size() <= 240)) &&
+      (!('gbpPublishedAt' in data) || (data.gbpPublishedAt is string && data.gbpPublishedAt.size() <= 60)) &&
+      (!('gbpSyncNote' in data) || (data.gbpSyncNote is string && data.gbpSyncNote.size() <= 300)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Review
+    function isValidReview(data, storeId) {
+      return data.keys().hasAll([
+        'ownerId', 'storeId', 'customerName', 'rating', 'reviewText',
+        'reviewDate', 'replyText', 'responseStatus', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'storeId', 'customerName', 'rating', 'reviewText',
+        'reviewDate', 'replyText', 'responseStatus', 'sentiment',
+        'gbpReviewName', 'gbpReplySyncedAt', 'gbpSyncNote',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.ownerId) &&
+      data.storeId == storeId &&
+      isValidId(data.storeId) &&
+      data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 100 &&
+      data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+      data.reviewText is string && data.reviewText.size() >= 1 && data.reviewText.size() <= 2000 &&
+      data.reviewDate is string && data.reviewDate.size() >= 1 && data.reviewDate.size() <= 60 &&
+      data.replyText is string && data.replyText.size() <= 2000 &&
+      data.responseStatus is string && data.responseStatus in ['Needs Response', 'Draft Saved', 'Replied'] &&
+      (!('sentiment' in data) || (data.sentiment is string && data.sentiment in ['Positive', 'Neutral', 'Negative'])) &&
+      (!('gbpReviewName' in data) || (data.gbpReviewName is string && data.gbpReviewName.size() <= 240)) &&
+      (!('gbpReplySyncedAt' in data) || (data.gbpReplySyncedAt is string && data.gbpReplySyncedAt.size() <= 60)) &&
+      (!('gbpSyncNote' in data) || (data.gbpSyncNote is string && data.gbpSyncNote.size() <= 300)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Connection test path
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Subscriptions Collection (Strict Backend/Webhook Authority — Client Writes Forbidden)
+    match /subscriptions/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // Usage Events Collection (Strict Backend Authority — Client Writes Forbidden)
+    match /usageEvents/{eventId} {
+      allow get: if isSignedIn() && isValidId(eventId) && existing().userId == request.auth.uid;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // Stores Collection
+    match /stores/{storeId} {
+      allow get: if isSignedIn() && isValidId(storeId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() &&
+        isValidId(storeId) &&
+        isValidStore(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser() &&
+        isValidId(storeId) &&
+        isValidStore(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action: Update Profile, GBP Connection, Brand Voice, or Automation Settings
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'category', 'businessType', 'description',
+            'address', 'city', 'phone', 'website', 'openingHours',
+            'services', 'seoKeywords', 'socialLinks', 'tone',
+            'brandVoicePreset', 'brandVoicePositiveTemplate',
+            'brandVoiceNeutralTemplate', 'brandVoiceNegativeTemplate', 'brandVoiceSignOff',
+            'gbpConnected',
+            'googleAccountId', 'gbpAccountEmail', 'gbpAccountId', 'gbpLocationId',
+            'gbpTokenStatus', 'gbpLastSync', 'gbpSyncError',
+            'gbpAverageRating', 'gbpTotalReviewCount',
+            'autoDailyPosts', 'dailyPostScheduleDate', 'dailyPostScheduleTime',
+            'autoReviewReplies', 'autoOfferReminders',
+            'autoProfileMonitoring', 'autoScoreMonitoring', 'updatedAt'
+          ])
+        );
+      allow delete: if isVerifiedUser() && isValidId(storeId) && existing().ownerId == request.auth.uid;
+
+      // Posts Subcollection
+      match /posts/{postId} {
+        allow get: if isSignedIn() && isValidId(storeId) && isValidId(postId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(postId) &&
+          isValidPost(incoming(), storeId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId);
+        allow update: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(postId) &&
+          isValidPost(incoming(), storeId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().storeId == existing().storeId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId) &&
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'postType', 'headline', 'description', 'cta', 'imageConcept', 'imageUrl', 'status', 'scheduledDate', 'scheduledTime', 'gbpLocalPostName', 'gbpPublishedAt', 'gbpSyncNote', 'updatedAt'
+            ])
+          );
+        allow delete: if isVerifiedUser() && isValidId(storeId) && isValidId(postId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+      }
+
+      // Offers Subcollection
+      match /offers/{offerId} {
+        allow get: if isSignedIn() && isValidId(storeId) && isValidId(offerId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(offerId) &&
+          isValidOffer(incoming(), storeId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId);
+        allow update: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(offerId) &&
+          isValidOffer(incoming(), storeId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().storeId == existing().storeId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId) &&
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title', 'description', 'discount', 'startDate', 'endDate', 'terms', 'cta', 'imageUrl', 'imagePrompt', 'status', 'gbpLocalPostName', 'gbpPublishedAt', 'gbpSyncNote', 'updatedAt'
+            ])
+          );
+        allow delete: if isVerifiedUser() && isValidId(storeId) && isValidId(offerId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+      }
+
+      // Reviews Subcollection
+      match /reviews/{reviewId} {
+        allow get: if isSignedIn() && isValidId(storeId) && isValidId(reviewId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(reviewId) &&
+          isValidReview(incoming(), storeId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId);
+        allow update: if isVerifiedUser() &&
+          isValidId(storeId) &&
+          isValidId(reviewId) &&
+          isValidReview(incoming(), storeId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().storeId == existing().storeId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          isParentStoreOwner(storeId) &&
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'replyText', 'responseStatus', 'sentiment', 'gbpReviewName', 'gbpReplySyncedAt', 'gbpSyncNote', 'updatedAt'
+            ])
+          );
+        allow delete: if isVerifiedUser() && isValidId(storeId) && isValidId(reviewId) && existing().ownerId == request.auth.uid && isParentStoreOwner(storeId);
+      }
+    }
+  }
+}

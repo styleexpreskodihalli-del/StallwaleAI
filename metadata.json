@@ -1,0 +1,6 @@
+{
+  "name": "STore Automation",
+  "description": "Your Store's Digital Growth, Automated. Multi-store SaaS platform helping local businesses manage their Google Business presence, daily posts, promotional offers, customer reviews, and Digital Score from one simple dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
