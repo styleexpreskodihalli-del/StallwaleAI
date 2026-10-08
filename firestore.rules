@@ -213,6 +213,50 @@ service cloud.firestore {
       allow get: if true;
     }
 
+    // Public STall Careers Applications — create only, no public read/list access.
+    match /careerApplications/{applicationId} {
+      allow create: if isValidId(applicationId) &&
+        request.resource.data.keys().hasAll([
+          'fullName', 'mobile', 'email', 'city', 'currentStatus',
+          'college', 'experience', 'whyJoin', 'role', 'status',
+          'source', 'submittedAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'fullName', 'mobile', 'email', 'city', 'currentStatus',
+          'college', 'experience', 'whyJoin', 'role', 'status',
+          'source', 'submittedAt'
+        ]) &&
+        request.resource.data.fullName is string &&
+        request.resource.data.fullName.size() >= 2 &&
+        request.resource.data.fullName.size() <= 120 &&
+        request.resource.data.mobile is string &&
+        request.resource.data.mobile.size() >= 7 &&
+        request.resource.data.mobile.size() <= 30 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() >= 5 &&
+        request.resource.data.email.size() <= 160 &&
+        request.resource.data.city is string &&
+        request.resource.data.city.size() >= 1 &&
+        request.resource.data.city.size() <= 100 &&
+        request.resource.data.currentStatus is string &&
+        request.resource.data.currentStatus in [
+          'College Student', 'Fresher', 'Working Professional',
+          'Self-employed', 'Other'
+        ] &&
+        request.resource.data.college is string &&
+        request.resource.data.college.size() <= 160 &&
+        request.resource.data.experience is string &&
+        request.resource.data.experience in ['Yes', 'No'] &&
+        request.resource.data.whyJoin is string &&
+        request.resource.data.whyJoin.size() >= 10 &&
+        request.resource.data.whyJoin.size() <= 2000 &&
+        request.resource.data.role == 'Sales Advisor / Business Development Intern' &&
+        request.resource.data.status == 'new' &&
+        request.resource.data.source == 'careers-page' &&
+        request.resource.data.submittedAt == request.time;
+      allow read, update, delete: if false;
+    }
+
     // Subscriptions Collection (Strict Backend/Webhook Authority — Client Writes Forbidden)
     match /subscriptions/{userId} {
       allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
