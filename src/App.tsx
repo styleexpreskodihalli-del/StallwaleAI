@@ -29,6 +29,7 @@ import { StallwaleLogo } from './components/StallwaleLogo';
 import { calculateDigitalScore, getStoreGbpRating } from './scoreUtils';
 import { runFullStoreAutoImprovement } from './utils/autoImproveEngine';
 import { StoreSetupWizard } from './components/StoreSetupWizard';
+import { CareersPage } from './components/CareersPage';
 import { StoreSelector } from './components/StoreSelector';
 import { DashboardView } from './components/DashboardView';
 import { StoreProfileView } from './components/StoreProfileView';
@@ -463,7 +464,7 @@ export default function App() {
     await signOut(auth);
   };
 
-  // Loading Skeleton
+  // Public careers route — keep recruitment accessible without requiring Google sign-in.\n  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/careers')) {\n    return <CareersPage />;\n  }\n\n  // Loading Skeleton
   if (!authReady || (user && (!storesLoaded || !subscriptionLoaded))) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
