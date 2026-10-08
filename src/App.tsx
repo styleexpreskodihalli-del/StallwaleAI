@@ -464,7 +464,7 @@ export default function App() {
     await signOut(auth);
   };
 
-  // Public careers route — keep recruitment accessible without requiring Google sign-in.\n  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/careers')) {\n    return <CareersPage />;\n  }\n\n  // Loading Skeleton
+  // Public careers route — keep recruitment accessible without requiring Google sign-in.\n  if (typeof window !== 'undefined' && (window.location.pathname.startsWith('/careers') || new URLSearchParams(window.location.search).get('careers') === '1')) {\n    return <CareersPage />;\n  }\n\n  // Loading Skeleton
   if (!authReady || (user && (!storesLoaded || !subscriptionLoaded))) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
