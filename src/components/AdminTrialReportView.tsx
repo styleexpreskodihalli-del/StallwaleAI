@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { auth } from '../firebase';
 import {
   AdminDatePreset,
   AdminCreditFilterBucket,
@@ -29,6 +30,18 @@ import {
   Lock,
   Cpu,
 } from 'lucide-react';
+
+async function getAdminAuthHeaders(adminEmail: string): Promise<Record<string, string>> {
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new Error('Your admin session has expired. Sign in again.');
+  }
+  const idToken = await currentUser.getIdToken();
+  return {
+    Authorization: `Bearer ${idToken}`,
+    'x-stallwale-admin-email': adminEmail,
+  };
+}
 
 interface AdminTrialReportViewProps {
   adminEmail: string;
@@ -220,9 +233,7 @@ export function AdminTrialReportView({ adminEmail }: AdminTrialReportViewProps) 
         qs.set('creditBucket', creditBucketFilter);
 
       const res = await fetch(`/api/admin/trial-report?${qs.toString()}`, {
-        headers: {
-          'x-stallwale-admin-email': adminEmail,
-        },
+        headers: await getAdminAuthHeaders(adminEmail),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -268,9 +279,7 @@ export function AdminTrialReportView({ adminEmail }: AdminTrialReportViewProps) 
       const res = await fetch(
         `/api/admin/trial-report/user-events?${qs.toString()}`,
         {
-          headers: {
-            'x-stallwale-admin-email': adminEmail,
-          },
+          headers: await getAdminAuthHeaders(adminEmail),
         }
       );
       if (res.ok) {
@@ -290,8 +299,8 @@ export function AdminTrialReportView({ adminEmail }: AdminTrialReportViewProps) 
       const res = await fetch('/api/admin/trial-report/alert-config', {
         method: 'POST',
         headers: {
+          ...(await getAdminAuthHeaders(adminEmail)),
           'Content-Type': 'application/json',
-          'x-stallwale-admin-email': adminEmail,
         },
         body: JSON.stringify({
           highUsagePercentThreshold: Number(highUsagePctInput) || 80,
@@ -328,9 +337,7 @@ export function AdminTrialReportView({ adminEmail }: AdminTrialReportViewProps) 
       const res = await fetch(
         `/api/admin/trial-report/export.csv?${qs.toString()}`,
         {
-          headers: {
-            'x-stallwale-admin-email': adminEmail,
-          },
+          headers: await getAdminAuthHeaders(adminEmail),
         }
       );
       if (!res.ok) return;
