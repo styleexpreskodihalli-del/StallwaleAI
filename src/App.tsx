@@ -93,6 +93,11 @@ export default function App() {
       const custom = e as CustomEvent<{ subscription?: SubscriptionRecord }>;
       if (custom.detail?.subscription) {
         setSubscription(custom.detail.subscription);
+        trackStallEvent('ai_credit_state_updated', {
+          subscription_status: String(custom.detail.subscription.subscriptionStatus || 'unknown'),
+          trial_credits_remaining: Number(custom.detail.subscription.trialCreditsRemaining || 0),
+          trial_credits_used: Number(custom.detail.subscription.trialCreditsUsed || 0),
+        });
       }
     };
     const handleCreditBlocked = (e: Event) => {
@@ -109,6 +114,8 @@ export default function App() {
       );
       trackStallEvent('ai_credit_gate_blocked', {
         subscription_status: String(custom.detail?.subscription?.subscriptionStatus || 'unknown'),
+        trial_credits_remaining: Number(custom.detail?.subscription?.trialCreditsRemaining || 0),
+        trial_credits_used: Number(custom.detail?.subscription?.trialCreditsUsed || 0),
       });
       setUpgradeModalOpen(true);
     };
