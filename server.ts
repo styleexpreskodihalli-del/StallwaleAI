@@ -2095,6 +2095,17 @@ async function startServer() {
 
   app.use(express.json({ limit: '2mb' }));
 
+  // Public GA4 measurement ID only; this value is not an authentication secret.
+  // No tracking script loads until the visitor explicitly accepts analytics.
+  app.get('/api/analytics-config', (_req, res) => {
+    const configuredId = String(
+      process.env.GA_MEASUREMENT_ID || process.env.VITE_GA_MEASUREMENT_ID || ''
+    ).trim();
+    const measurementId = /^G-[A-Z0-9]+$/.test(configuredId) ? configuredId : '';
+    res.set('Cache-Control', 'public, max-age=300');
+    return res.json({ measurementId });
+  });
+
   // Helper to extract userId, email, and storeId from request body or headers
   function extractCreditContext(req: express.Request): {
     userId: string;

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { trackStallEvent, trackStallEventOncePerSession } from './utils/analytics';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import {
   collection,
@@ -106,6 +107,9 @@ export default function App() {
         custom.detail?.message ||
           'Your 50 trial credits have been used. Upgrade to continue using AI-powered STall features.'
       );
+      trackStallEvent('ai_credit_gate_blocked', {
+        subscription_status: String(custom.detail?.subscription?.subscriptionStatus || 'unknown'),
+      });
       setUpgradeModalOpen(true);
     };
 
@@ -162,6 +166,12 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthReady(true);
+      if (currentUser) {
+        trackStallEventOncePerSession(
+          'stall-ai-studio-signed-in-v1',
+          'ai_studio_signed_in'
+        );
+      }
       if (!currentUser) {
         setGbpAccessToken(null);
         setStores([]);
@@ -248,6 +258,15 @@ export default function App() {
         if (res.ok && !cancelled) {
           const data = (await res.json()) as SubscriptionRecord;
           setSubscription(data);
+          trackStallEventOncePerSession(
+            'stall-ai-studio-subscription-status-v1',
+            'ai_subscription_status_seen',
+            {
+              subscription_status: String(data.subscriptionStatus || 'unknown'),
+              currency: String(data.currency || 'unknown'),
+              trial_credits_remaining: Number(data.trialCreditsRemaining || 0),
+            }
+          );
         }
       } catch {
         // Ignore transient network errors
