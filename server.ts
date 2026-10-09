@@ -4643,51 +4643,126 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
     return res.json(status);
   });
 
-  // Server-Side Admin Authorization Helper (Requirement 13: ADMIN ONLY)
-  function verifyAdminRequest(req: express.Request): {
+  // Server-Side Admin Authorization Helper.
+  // Never trust an email sent in a request header/query: clients can forge it.
+  // Verify the Firebase ID token with Firebase Auth, then check the verified email.
+  function getFirebaseWebApiKey(): string {
+    const fromEnv = String(
+      process.env.FIREBASE_WEB_API_KEY || process.env.VITE_FIREBASE_API_KEY || ''
+    ).trim();
+    if (fromEnv) return fromEnv;
+    try {
+      const config = JSON.parse(
+        fs.readFileSync(path.join(__dirname, 'firebase-applet-config.json'), 'utf8')
+      ) as { apiKey?: unknown };
+      return String(config.apiKey || '').trim();
+    } catch {
+      return '';
+    }
+  }
+
+  async function verifyAdminRequest(req: express.Request): Promise<{
     authorized: boolean;
     adminEmail: string;
     errorStatus?: number;
     errorMessage?: string;
-  } {
-    const rawEmail = String(
+  }> {
+    const authHeader = String(req.headers.authorization || '');
+    const tokenMatch = authHeader.match(/^Bearer\\s+([^\\s]+)$/i);
+    if (!tokenMatch) {
+      return {
+        authorized: false,
+        adminEmail: '',
+        errorStatus: 401,
+        errorMessage: 'A valid signed-in administrator session is required.',
+      };
+    }
+
+    const apiKey = getFirebaseWebApiKey();
+    if (!apiKey) {
+      console.error('[admin-auth] Firebase Web API key is not configured.');
+      return {
+        authorized: false,
+        adminEmail: '',
+        errorStatus: 503,
+        errorMessage: 'Admin authentication is temporarily unavailable.',
+      };
+    }
+
+    let verifiedEmail = '';
+    try {
+      const identityResponse = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken: tokenMatch[1] }),
+          signal: AbortSignal.timeout(8000),
+        }
+      );
+      if (!identityResponse.ok) {
+        return {
+          authorized: false,
+          adminEmail: '',
+          errorStatus: 401,
+          errorMessage: 'Your administrator session is invalid or has expired. Sign in again.',
+        };
+      }
+
+      const identityPayload = (await identityResponse.json()) as {
+        users?: Array<{ email?: string; emailVerified?: boolean }>;
+      };
+      const identity = identityPayload.users?.[0];
+      verifiedEmail = String(identity?.email || '').trim().toLowerCase();
+      if (!verifiedEmail || identity?.emailVerified !== true) {
+        return {
+          authorized: false,
+          adminEmail: '',
+          errorStatus: 401,
+          errorMessage: 'A verified administrator identity is required.',
+        };
+      }
+    } catch {
+      return {
+        authorized: false,
+        adminEmail: '',
+        errorStatus: 503,
+        errorMessage: 'Admin authentication is temporarily unavailable. Please retry.',
+      };
+    }
+
+    // A client-supplied email is only a consistency check, never identity proof.
+    const claimedEmail = String(
       req.headers['x-stallwale-admin-email'] ||
         req.headers['x-stallwale-user-email'] ||
         req.query.adminEmail ||
         (req.body && req.body.adminEmail) ||
         ''
-    )
-      .trim()
-      .toLowerCase();
-
-    if (!rawEmail) {
+    ).trim().toLowerCase();
+    if (claimedEmail && claimedEmail !== verifiedEmail) {
       return {
         authorized: false,
         adminEmail: '',
-        errorStatus: 401,
-        errorMessage: 'Admin authentication is required to access STall Admin reports.',
+        errorStatus: 403,
+        errorMessage: 'The signed-in identity does not match the requested administrator.',
       };
     }
 
-    if (!PRESERVED_ADMIN_AND_EXISTING_EMAILS.has(rawEmail)) {
+    if (!PRESERVED_ADMIN_AND_EXISTING_EMAILS.has(verifiedEmail)) {
       return {
         authorized: false,
-        adminEmail: rawEmail,
+        adminEmail: verifiedEmail,
         errorStatus: 403,
-        errorMessage:
-          'Forbidden: This report is restricted to authorized STallwale administrators.',
+        errorMessage: 'Forbidden: this report is restricted to authorized STallwale administrators.',
       };
     }
 
-    return {
-      authorized: true,
-      adminEmail: rawEmail,
-    };
+    return { authorized: true, adminEmail: verifiedEmail };
   }
 
   // Admin-Only Trial & Credit Usage Report Endpoint (Paginated + Server-Side Aggregated)
-  app.get('/api/admin/trial-report', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.get('/api/admin/trial-report', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
@@ -4721,8 +4796,8 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
   });
 
   // Admin-Only Per-User Credit Usage History Drill-Down (Requirement 5)
-  app.get('/api/admin/trial-report/user-events', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.get('/api/admin/trial-report/user-events', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
@@ -4764,8 +4839,8 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
   });
 
   // Admin-Only Configurable Alert Thresholds Update (Requirement 9)
-  app.post('/api/admin/trial-report/alert-config', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.post('/api/admin/trial-report/alert-config', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
@@ -4799,8 +4874,8 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
   });
 
   // Admin-Only CSV Export (Requirement 12)
-  app.get('/api/admin/trial-report/export.csv', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.get('/api/admin/trial-report/export.csv', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
@@ -4907,8 +4982,8 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
     });
   });
 
-  app.post('/api/subscription/credit-costs', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.post('/api/subscription/credit-costs', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
@@ -4939,8 +5014,8 @@ Generate the complete, realistic, local-SEO-optimized Google Business Profile li
   });
 
   // Get usage events & admin cost-control analytics (Admin Only)
-  app.get('/api/subscription/admin-analytics', (req, res) => {
-    const authCheck = verifyAdminRequest(req);
+  app.get('/api/subscription/admin-analytics', async (req, res) => {
+    const authCheck = await verifyAdminRequest(req);
     if (!authCheck.authorized) {
       return res
         .status(authCheck.errorStatus || 403)
